@@ -49,7 +49,7 @@ for line in csv:
     if len(cs) != 3:
         continue
     # print('line: ', i)
-    i +=1
+    i += 1
     # print('cs: ', cs)
     # print('cd: ', cs[1])
     # print('val: ', cs[2][2:])
@@ -59,7 +59,6 @@ for line in csv:
 
     chn = int(cs[1])
 
-   
     if chans < chn:
         chans = chn
 
@@ -77,13 +76,15 @@ csv.close()
 
 data = b''.join(datas)
 
-rates = [8000, 11025, 16000, 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000]
+rates = [8000, 11025, 16000, 22050, 32000,
+         44100, 48000, 88200, 96000, 176400, 192000]
 print('time_of_last: ', time_of_last)
 print('time_of_first: ', time_of_first)
 
 measured_rate = smpl_cnt / (time_of_last - time_of_first)
 rate = min(rates, key=lambda x: abs(x-measured_rate))
-print('Length:', int(time_of_last-time_of_first), "Rate:", rate, "Channels:", chans)
+print('Length:', int(time_of_last-time_of_first),
+      "Rate:", rate, "Channels:", chans)
 
 wav.setframerate(rate)
 wav.setnchannels(chans)
