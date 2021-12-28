@@ -26,50 +26,61 @@ except IOError as e:
 
 '''
 Time [s], Analyzer Name, Decoded Protocol Result
-0.000011500000000,I2S / PCM,Ch 2: '0' (0x0000)
-0.000021750000000,I2S / PCM,Ch 1: '0' (0x0000)
-0.000032250000000,I2S / PCM,Ch 2: '0' (0x0000)
-0.000042500000000,I2S / PCM,Ch 1: '0' (0x0000)
-0.000053000000000,I2S / PCM,Ch 2: '0' (0x0000)
+0.000011500000000, 1, 0x0000
+0.000021750000000, 2, 0x0000
+0.000032250000000, 1, 0x0000
+0.000042500000000, 2, 0x0000
+0.000053000000000, 1, 0x0000
 '''
 
 sample = struct.Struct('H')
 data = b''
 
 chans = 1
-wffch = True   #waiting for first chan
+wffch = True   # waiting for first chan
 
 time_of_first = None
 time_of_last = None
 smpl_cnt = 0
-
+i = 0
+datas = []
 for line in csv:
     cs = line.split(',')
     if len(cs) != 3:
         continue
-    if cs[1].startswith('I2S'):
-        ch, val = cs[2].split('(0x')
-        chn = int(ch[3])
+    # print('line: ', i)
+    i +=1
+    # print('cs: ', cs)
+    # print('cd: ', cs[1])
+    # print('val: ', cs[2][2:])
+    # ch, val = cs[2].split('(0x')
+    # while(1):
+    #     pass
 
-        if chans < chn:
-            chans = chn
+    chn = int(cs[1])
 
-        if wffch and chn != 1:
-            continue
-        wffch = False
+   
+    if chans < chn:
+        chans = chn
 
-        if chn == 1:
-            time_of_last = float(cs[0])
-            if time_of_first is None:
-                time_of_first = time_of_last
-            smpl_cnt += 1
+    if wffch and chn != 1:
+        continue
+    wffch = False
 
-        data += sample.pack(int(val[:-2], 16))
-
-
+    if chn == 1:
+        time_of_last = float(cs[0])
+        if time_of_first is None:
+            time_of_first = time_of_last
+        smpl_cnt += 1
+    datas.append(sample.pack(int(cs[2][2:], 16)))
 csv.close()
 
+data = b''.join(datas)
+
 rates = [8000, 11025, 16000, 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000]
+print('time_of_last: ', time_of_last)
+print('time_of_first: ', time_of_first)
+
 measured_rate = smpl_cnt / (time_of_last - time_of_first)
 rate = min(rates, key=lambda x: abs(x-measured_rate))
 print('Length:', int(time_of_last-time_of_first), "Rate:", rate, "Channels:", chans)
